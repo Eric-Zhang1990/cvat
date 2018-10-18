@@ -38,7 +38,7 @@ if apps.is_installed('cvat.apps.tf_annotation'):
     urlpatterns.append(path('tf_annotation/', include('cvat.apps.tf_annotation.urls')))
 
 if apps.is_installed('cvat.apps.git_anno_repos'):
-    urlpatterns.append(path('git_anno_repos/', include('cvat.apps.git_anno_repos.urls')))
+    urlpatterns.append(path('repository/', include('cvat.apps.git_anno_repos.urls')))
 
 if apps.is_installed('cvat.apps.log_viewer'):
     urlpatterns.append(path('analytics/', include('cvat.apps.log_viewer.urls')))
