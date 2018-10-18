@@ -23,7 +23,7 @@ def createGitRecord(request):
 
         db_git_repos = GitRepos()
         db_git_repos.task = db_task
-        db_git_repos.value = value
+        db_git_repos.git_repos = value
         db_git_repos.save()
 
         return HttpResponse()
