@@ -6,7 +6,7 @@
 
 "use strict";
 
-function updateCreateDialog() {
+document.addEventListener("DOMContentLoaded", () => {
     $(`
         <tr>
             <td> <label class="regular h2"> Git Repos: </label> </td>
@@ -31,16 +31,14 @@ function updateCreateDialog() {
                 }),
                 contentType: 'application/json;charset=utf-8',
                 error: (data) => {
-                    let message = `Warning: Can't create git record for task ${tid}: ${data.responseText}`;
-                    showMessage(message);
+                    throw Error(`Warning: Can't create git record for task ${tid}: ${data.responseText}`);
+                },
+                complete: () => {
+                    originalOnSuccessCreate();
                 }
             });
-
-            originalOnSuccessCreate();
         }
 
         originalCreateTaskRequest(oData, onSuccessRequest, onSuccessCreate, onError, onComplete, onUpdateStatus);
     }
-}
-
-document.addEventListener("DOMContentLoaded", updateCreateDialog);
+});
