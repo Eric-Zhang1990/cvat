@@ -47,9 +47,16 @@ def updateRepository(request):
 
         db_job = Job.objects.select_related('segment__task').get(pk = jid)
         db_task = db_job.segment.task
-        db_repos = GitRepos.objects.select_for_update().get(pk = db_task)
-        db_repos.git_repos = value
-        db_repos.save()
+
+        if GitRepos.objects.filter(pk = db_task).exists():
+            db_repos = GitRepos.objects.select_for_update().get(pk = db_task)
+            db_repos.git_repos = value
+            db_repos.save()
+        else:
+            db_repos = GitRepos()
+            db_repos.task = db_task
+            db_repos.git_repos = value
+            db_repos.save()
 
         return HttpResponse()
     except Exception as e:
