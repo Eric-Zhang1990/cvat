@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let closeReposWindowButtonId = 'closeGitReposButton';
     let gitRepositoryURLInputTextId = 'gitReposInputText';
     let gitRepositoryURLUpdateButtonId = 'gitReposUpdateButton';
+    let gitRepositoryPushButtonId = 'gitReposPushButton';
     let gitLabelStatusId = 'gitReposLabelStatus';
     let gitLabelMessageId = 'gitReposLabelMessage';
 
@@ -40,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </div>
                             </td>
                             <td>
-                                <button style="width: 70%;" class="regular h2"> Push </button>
+                                <button style="width: 70%;" id="${gitRepositoryPushButtonId}" class="regular h2"> Push </button>
                             </td>
                         </tr>
                     </table>
@@ -67,14 +68,62 @@ document.addEventListener("DOMContentLoaded", () => {
     let repositoryURLInput = $(`#${gitRepositoryURLInputTextId}`);
     let gitLabelMessage = $(`#${gitLabelMessageId}`);
     let gitLabelStatus = $(`#${gitLabelStatusId}`);
+    let repositoryUpdateButton = $(`#${gitRepositoryURLUpdateButtonId}`);
+    let repositoryPushButton = $(`#${gitRepositoryPushButtonId}`);
+
+    repositoryURLInput.on('keyup keydown keypress', (e) => e.stopPropagation());
 
     closeRepositoryWindowButton.on('click', () => {
         gitWindow.addClass('hidden');
     });
 
+    repositoryUpdateButton.on('click', () => {
+        let newURL = repositoryURLInput.prop('value').replace(/\s/g,'');
+        if (!newURL) {
+            $.ajax({
+                url: '/repository/delete/' + window.cvat.job.id,
+                type: 'DELETE',
+                success: () => {
+                    updateRepositoryInfo();
+                },
+                error: (data) => {
+                    let message = `Can not delete repository entry. Code: ${data.status}, text: ${data.responseText || data.statusText}`;
+                    showMessage(message);
+                    throw Error(message);
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: '/repository/update',
+                type: 'POST',
+                data: JSON.stringify({
+                    'jid': window.cvat.job.id,
+                    'value': newURL,
+                }),
+                success: () => {
+                    updateRepositoryInfo();
+                },
+                error: (data) => {
+                    let message = `Can not update repository entry. Code: ${data.status}, text: ${data.responseText || data.statusText}`;
+                    showMessage(message);
+                    throw Error(message);
+                }
+            });
+        }
+    });
+
+    repositoryPushButton.on('click', () => {
+        // to do
+    });
+
     $(`<button class="menuButton semiBold h2"> Git Repository </button>`).on('click', () => {
         $('#annotationMenu').addClass('hidden');
         gitWindow.removeClass('hidden');
+        updateRepositoryInfo();
+    }).prependTo($('#engineMenuButtons'));
+
+    function updateRepositoryInfo() {
         gitLabelMessage.css('color', 'yellowgreen').text('Updating..');
         gitLabelStatus.css('color', 'yellowgreen').text('\u23F2');
 
@@ -113,10 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             error: (data) => {
                 gitWindow.addClass('hidden');
-                let message = `Get respository URL errors: ${data.responseText}`;
+                let message = `Get respository URL errors. Code: ${data.status}, text: ${data.responseText || data.statusText}`;
                 showMessage(message);
                 throw Error(message);
             }
         });
-    }).prependTo($('#engineMenuButtons'));
+    }
 });

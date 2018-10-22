@@ -37,6 +37,25 @@ def createRepository(request):
         slogger.glob.error("cannot create git record for task #{}".format(tid), exc_info=True)
         return HttpResponseBadRequest(str(e))
 
+@login_required
+@permission_required(perm=['engine.view_task', 'engine.change_task'], raise_exception=True)
+def updateRepository(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        jid = data['jid']
+        value = data['value']
+
+        db_job = Job.objects.select_related('segment__task').get(pk = jid)
+        db_task = db_job.segment.task
+        db_repos = GitRepos.objects.select_for_update().get(pk = db_task)
+        db_repos.git_repos = value
+        db_repos.save()
+
+        return HttpResponse()
+    except Exception as e:
+        slogger.job[jid].error("cannot delete git record", exc_info=True)
+        return HttpResponseBadRequest(str(e))
+
 
 @login_required
 @permission_required(perm=['engine.view_task'], raise_exception=True)
@@ -72,8 +91,9 @@ def deleteRepository(request, jid):
         db_job = Job.objects.select_related("segment__task").get(pk = jid)
         db_task = db_job.segment.task
 
-        git_repos = GitRepos.objects.get(pk = db_task).select_for_update()
-        git_repos.delete()
+        if GitRepos.objects.filter(pk = db_task).exists():
+            git_repos = GitRepos.objects.select_for_update().get(pk = db_task)
+            git_repos.delete()
 
         return HttpResponse()
     except Exception as e:
