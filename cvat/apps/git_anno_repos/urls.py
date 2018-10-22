@@ -7,6 +7,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('create', views.createGitRecord),
-    path('delete/<int:tid>', views.deleteGitRecord),
+    path('create', views.createRepository),
+    path('get/<int:jid>', views.getRepository),
+    path('delete/<int:jid>', views.deleteRepository),
 ]
