@@ -5,7 +5,7 @@
 #
 
 from django.db import models
-from engine.models import Task
+from cvat.apps.engine.models import Task
 
 class AnnotationFlag(models.Model):
     task = models.OneToOneField(Task, on_delete = models.CASCADE)
