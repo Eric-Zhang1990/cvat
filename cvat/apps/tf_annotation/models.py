@@ -1,9 +1,13 @@
-
+#
 # Copyright (C) 2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
+#
 
 from django.db import models
+from engine.models import Task
 
-# Create your models here.
-
+class AnnotationFlag(models.Model):
+    task = models.OneToOneField(Task, on_delete = models.CASCADE)
+    is_being_annotated = models.BooleanField(default = False)
+    last_ann_successful = models.BooleanField(default = False)

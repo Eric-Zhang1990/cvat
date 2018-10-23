@@ -205,7 +205,7 @@ def get_job(jid):
                 attributes[db_label.id][db_attrspec.id] = db_attrspec.text
 
         response = {
-            "status": db_task.status.capitalize(),
+            "status": db_job.status,
             "labels": { db_label.id:db_label.name for db_label in db_labels },
             "stop": db_segment.stop_frame,
             "taskid": db_task.id,
@@ -223,6 +223,32 @@ def get_job(jid):
         raise Exception("Cannot find the job: {}".format(jid))
 
     return response
+
+def save_job_status(jid, status, user):
+    db_job = Job.objects.select_related("segment__task").select_for_update().get(pk = jid)
+    db_task = db_job.segment.task
+
+    if status not in db_job.get_status_set():
+        raise Exception("Got unknown job status")
+
+    slogger.job[jid].info('changing job status from {} to {} by an user {}'.format(db_job.status, status, user))
+    db_job.status = status
+    db_job.save()
+
+    db_segments = list(db_task.segment_set.prefetch_related('job_set').select_for_update().all())
+    db_jobs = [db_segment.job_set.first() for db_segment in db_segments]
+    for db_job in db_jobs:
+        if db_job.status == "annotation":
+            db_task.status = "annotation"
+            break
+        elif db_job.status == "validation":
+            db_task.status = "validation"
+            break
+        else:
+            db_task.status = "completed"
+
+    db_task.save()
+
 
 def is_task_owner(user, tid):
     try:
