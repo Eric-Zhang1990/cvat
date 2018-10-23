@@ -522,10 +522,11 @@ function setupMenu(job, shapeCollectionModel, annotationParser, aamModel, player
         $.ajax({
             type: 'POST',
             url: 'save/job/status',
-            data: {
+            data: JSON.stringify({
                 jid: window.cvat.job.id,
                 status: e.target.value
-            },
+            }),
+            contentType: "application/json; charset=utf-8",
             error: (data) => {
                 showMessage(`Can not change job status. Code: ${data.status}. Message: ${data.responeText || data.statusText}`);
             }

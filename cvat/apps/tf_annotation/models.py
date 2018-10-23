@@ -8,6 +8,6 @@ from django.db import models
 from cvat.apps.engine.models import Task
 
 class AnnotationFlag(models.Model):
-    task = models.OneToOneField(Task, on_delete = models.CASCADE)
+    task = models.OneToOneField(Task, on_delete = models.CASCADE, primary_key=True)
     is_being_annotated = models.BooleanField(default = False)
     last_ann_successful = models.BooleanField(default = False)

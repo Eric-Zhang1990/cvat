@@ -90,20 +90,38 @@ window.cvat.dashboard = window.cvat.dashboard || {};
 window.cvat.dashboard.uiCallbacks = window.cvat.dashboard.uiCallbacks || [];
 
 window.cvat.dashboard.uiCallbacks.push(function(newElements) {
-    newElements.each(function(idx) {
-        let elem = $(newElements[idx]);
-        let taskId = +elem.attr('id').split('_')[1];
-        let status = $.trim($(elem.find('label.dashboardStatusLabel')[0]).text());
-        let buttonsUI = elem.find('div.dashboardButtonsUI')[0];
-        let tfAnnotationButton = $('<button> Run TF Annotation </button>');
-        tfAnnotationButton.on('click', onTFAnnotationClick.bind(tfAnnotationButton));
-        tfAnnotationButton.addClass('dashboardTFAnnotationButton semiBold dashboardButtonUI');
-        tfAnnotationButton.appendTo(buttonsUI);
+    $.ajax({
+        type: 'GET',
+        url: '/tf_annotation/meta/get',
+        success: (data) => {
+            let taskDict = {};
+            data.map((el) => {
+                taskDict[el.tid] = {
+                    is_being_annotated: el.is_being_annotated,
+                    last_ann_successful: el.last_ann_successful,
+                }
+            });
 
-        if (status == "TF Annotation") {
-            tfAnnotationButton.text("Cancel TF Annotation");
-            tfAnnotationButton.addClass("tfAnnotationProcess");
-            CheckTFAnnotationRequest(taskId, tfAnnotationButton);
+            newElements.each(function(idx) {
+                let elem = $(newElements[idx]);
+                let taskId = +elem.attr('id').split('_')[1];
+                let buttonsUI = elem.find('div.dashboardButtonsUI')[0];
+                let tfAnnotationButton = $('<button> Run TF Annotation </button>');
+                tfAnnotationButton.on('click', onTFAnnotationClick.bind(tfAnnotationButton));
+                tfAnnotationButton.addClass('dashboardTFAnnotationButton semiBold dashboardButtonUI');
+                tfAnnotationButton.appendTo(buttonsUI);
+
+                if ((taskId in taskDict) && (taskDict[taskId].is_being_annotated)) {
+                    tfAnnotationButton.text("Cancel TF Annotation");
+                    tfAnnotationButton.addClass("tfAnnotationProcess");
+                    CheckTFAnnotationRequest(taskId, tfAnnotationButton);
+                }
+            });
+        },
+        error: (data) => {
+            let message = `Can not get tf annotation meta info. Code: ${data.status}. Message: ${data.responseText || data.statusText}`;
+            showMessage(message);
+            throw Error(message);
         }
-    });
+    })
 });

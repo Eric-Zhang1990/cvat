@@ -225,7 +225,7 @@ def get_job(jid):
     return response
 
 def save_job_status(jid, status, user):
-    db_job = Job.objects.select_related("segment__task").select_for_update().get(pk = jid)
+    db_job = models.Job.objects.select_related("segment__task").select_for_update().get(pk = jid)
     db_task = db_job.segment.task
 
     if status not in db_job.get_status_set():

@@ -284,7 +284,10 @@ def save_job_status(request):
         slogger.job[jid].info("changing job status request")
         task.save_job_status(jid, status, request.user.username)
     except Exception as e:
-        slogger.job[jid].error("cannot change status", exc_info=True)
+        if jid:
+            slogger.job[jid].error("cannot change status", exc_info=True)
+        else:
+            slogger.glob.error("cannot change status", exc_info=True)
         return HttpResponseBadRequest(str(e))
 
     return HttpResponse()
