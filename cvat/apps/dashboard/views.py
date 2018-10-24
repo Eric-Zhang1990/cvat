@@ -98,7 +98,7 @@ def DetailTaskInfo(request, task, dst_dict):
 @permission_required('engine.view_task', raise_exception=True)
 def DashboardView(request):
     filter_name = request.GET['search'] if 'search' in request.GET else None
-    filter_job = int(request.GET['jid']) if 'jid' in request.GET and request.GET('jid').isdigit() else None
+    filter_job = int(request.GET['jid']) if 'jid' in request.GET and request.GET['jid'].isdigit() else None
     elements_per_page = 20
     filter_page = None
     task_list = None
@@ -110,8 +110,6 @@ def DashboardView(request):
         if filter_name is not None:
             task_list = list(filter(lambda x: filter_name.lower() in x.name.lower(), task_list))
         filter_page = int(request.GET['page']) if 'page' in request.GET and request.GET['page'].isdigit() else None
-
-    task_list = task_list * 50
 
     if filter_page is not None:
         start, stop = (filter_page - 1) * elements_per_page, filter_page * elements_per_page - 1    # 0, 19; 20, 39, 40, 59 etc
