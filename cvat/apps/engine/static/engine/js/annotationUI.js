@@ -55,6 +55,9 @@ function buildAnnotationUI(job, shapeData, loadJobEvent) {
             z_order: job.z_order,
             id: job.jobid
         },
+        task: {
+            id: job.taskid
+        },
         search: {
             value: window.location.search,
 
@@ -195,7 +198,7 @@ function buildAnnotationUI(job, shapeData, loadJobEvent) {
 
     $(window).on('click', function(event) {
         Logger.updateUserActivityTimer();
-        if (['helpWindow', 'settingsWindow'].indexOf(event.target.id) != -1) {
+        if (event.target.classList.contains('modal')) {
             event.target.classList.add('hidden');
         }
     });
